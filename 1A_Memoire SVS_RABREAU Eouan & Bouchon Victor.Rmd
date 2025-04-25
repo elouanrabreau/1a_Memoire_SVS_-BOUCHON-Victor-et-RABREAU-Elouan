@@ -1,0 +1,443 @@
+---
+title: "Untitled"
+author: "Elouan"
+date: "2025-04-07"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+# Installation des packages
+# 
+# install.packages("dplyr")
+# install.packages("ggpubr")
+# install.packages("rstatix")
+# install.packages("coin")
+# install.packages("ggplot2")
+# install.packages("rstatix") 
+# install.packages("tidyverse")
+# install.packages("emmeans")
+# install.packages("datarium")
+# install.packages("lme4") 
+# install.packages("car")
+# install.packages("lmerTest")
+```
+
+```{r}
+# Chargement des bibliothèques
+
+library(dplyr)
+library(ggpubr)
+library(rstatix)
+library(coin)
+library(ggplot2)
+library(tidyverse)
+library(emmeans)
+library(datarium)
+library(lme4)
+library(car)
+library(lmerTest)
+```
+
+# Partie 1: Temps de réaction sur le test SART
+
+```{r}
+# Importation du jeu de données (test_SART.csv)
+test_reaction <- read.csv(file.choose(), sep=";", header=TRUE)
+test_reaction
+
+# Pour avoir un intercept interprétable, on commence les numéro à 0 et pas à 1 (donc on soustrait 1 partout)
+test_reaction$numero = test_reaction$numero - 1
+
+# Filtrage pour exclure le premier test (numero == 0)
+test_reaction <- test_reaction[test_reaction$numero > 0, ]
+
+# Visualisation des différentes données sur les individus selon les conditions
+test_reaction %>%
+  group_by(id, condition) %>%
+  get_summary_stats(temps_reaction, type = "common")
+```
+
+```{r}
+# Test de normalité
+test_reaction %>%
+  group_by(condition) %>%
+  shapiro_test(temps_reaction)
+
+# Visualisation
+ggqqplot(test_reaction, "temps_reaction", facet.by = "condition")
+
+# Visualisation
+ggplot(test_reaction, aes(x=temps_reaction, fill=condition)) +
+  geom_density(alpha=0.5) +
+  labs(title="Evaluation de la normalité du temps de réaction selon les trois conditions",
+       x="Temps de réaction", y="Condition") +
+  theme_bw()
+```
+
+```{r}
+# Evolution du temps de réaction selon les conditions
+ggplot(test_reaction, aes(x = numero, y = temps_reaction, color = condition)) +
+  stat_summary(fun = mean, geom = "line") +
+  stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.2) +
+  scale_x_continuous(breaks = seq(0,5, by = 1)) +
+  theme_minimal() +
+  labs(title = "Evolution du temps de réaction selon les conditions", x = "Numéro du Test Cognitif", y = "Temps de Réaction (s)")
+```
+
+```{r}
+# Convertir test_reaction$condition en facteur
+test_reaction$condition <- as.factor(test_reaction$condition)
+
+# Re-définir l’ordre des niveaux de "condition" avec le groupe "contrôle" en référence
+test_reaction$condition <- relevel(test_reaction$condition, ref = "controle")
+
+# Modèle mixte pour analyser l'effet du temps (numero) et de la condition
+model_temps_reaction <- lmer(temps_reaction ~ numero * condition + (1 | id), data = test_reaction)
+summary(model_temps_reaction)
+
+# Vérification des hypothèses
+
+  ## Normalité des résidus: Q-Q plot des résidus
+  qqnorm(resid(model_temps_reaction), main = "Q-Q Plot des résidus")
+  qqline(resid(model_temps_reaction), col = "red", lwd = 2)
+
+  ## Homoscédasticité (variance constante des résidus)
+  plot(fitted(model_temps_reaction), resid(model_temps_reaction),
+      xlab = "Valeurs ajustées", ylab = "Résidus",
+      main = "Résidus vs Valeurs ajustées")
+  abline(h = 0, col = "red", lty = 2)
+
+# Re-définir l’ordre des niveaux de "condition" avec la capsule caféinée en référence
+test_reaction_2 <- test_reaction
+test_reaction_2$condition <- relevel(test_reaction_2$condition, ref = "capsule caféinée")
+
+# Modèle mixte pour analyser l'effet du temps (numero) et de la condition
+model_temps_reaction_2 <- lmer(temps_reaction ~ numero * condition + (1 | id), data = test_reaction_2)
+summary(model_temps_reaction_2)
+
+# Vérification des hypothèses
+
+  ## Normalité des résidus: Q-Q plot des résidus
+  qqnorm(resid(model_temps_reaction_2), main = "Q-Q Plot des résidus")
+  qqline(resid(model_temps_reaction_2), col = "red", lwd = 2)
+
+  ## Homoscédasticité (variance constante des résidus)
+  plot(fitted(model_temps_reaction_2), resid(model_temps_reaction_2),
+      xlab = "Valeurs ajustées", ylab = "Résidus",
+      main = "Résidus vs Valeurs ajustées")
+  abline(h = 0, col = "red", lty = 2)
+
+
+############################
+
+
+# Etant donné que nous n'avons aucune différence significative entre les conditions, nous pouvons regarder l'effet global du temps (numero), en prenant en compte la variabilité des individus (id) et des conditions (condition)
+model_temps_reaction_3 <- lmer(temps_reaction ~ numero + (1 | id + condition), data = test_reaction)
+summary(model_temps_reaction_3)
+
+# Vérification des hypothèses
+
+  ## Normalité des résidus: Q-Q plot des résidus
+  qqnorm(resid(model_temps_reaction_3), main = "Q-Q Plot des résidus")
+  qqline(resid(model_temps_reaction_3), col = "red", lwd = 2)
+
+  ## Homoscédasticité (variance constante des résidus)
+  plot(fitted(model_temps_reaction_3), resid(model_temps_reaction_3),
+      xlab = "Valeurs ajustées", ylab = "Résidus",
+      main = "Résidus vs Valeurs ajustées")
+  abline(h = 0, col = "red", lty = 2)
+```
+
+# Partie 2 : Score sur le test SART
+
+```{r}
+# Importation du jeu de données (test_SART.csv)
+test_score <- read.csv(file.choose(), sep=";", header=TRUE)
+test_score
+
+# Pour avoir un intercept interprétable, on commence les numéro à 0 et pas à 1 (donc on soustrait 1 partout)
+test_score$numero = test_score$numero - 1
+
+# Filtrage pour exclure le premier test (numero == 0)
+test_score <- test_score[test_score$numero > 0, ]
+
+# Visualisation des différentes données sur les individus selon les conditions
+test_score %>%
+  group_by(id, condition) %>%
+  get_summary_stats(score, type = "common")
+```
+
+```{r}
+# Evolution du score par condition
+ggplot(test_score, aes(x = numero, y = score, color = condition)) +
+  stat_summary(fun = mean, geom = "line") +
+  stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.2) +
+  scale_x_continuous(breaks = seq(0,5, by = 1)) +
+  theme_minimal() +
+  labs(title = "Evolution du score selon les conditions", x = "Numéro du Test Cognitif", y = "Score (%)")
+```
+
+```{r}
+# Convertir test_score$condition en facteur
+test_score$condition <- as.factor(test_score$condition)
+
+# Re-définir l’ordre des niveaux de "condition" pour avoir le groupe "contrôle" en référence
+test_score$condition <- relevel(test_score$condition, ref = "controle")
+
+# Modèle mixte pour analyser l'effet du temps (numero) et de la condition
+model_score <- lmer(score ~ numero * condition + (1 | id), data = test_score)
+summary(model_score)
+
+# Vérification des hypothèses
+
+  ## Normalité des résidus: Q-Q plot des résidus
+  qqnorm(resid(model_score), main = "Q-Q Plot des résidus")
+  qqline(resid(model_score), col = "red", lwd = 2)
+
+  ## Homoscédasticité (variance constante des résidus)
+  plot(fitted(model_score), resid(model_score),
+      xlab = "Valeurs ajustées", ylab = "Résidus",
+      main = "Résidus vs Valeurs ajustées")
+  abline(h = 0, col = "red", lty = 2)
+
+# Re-définir l’ordre des niveaux de "condition" pour avoir la capsule caféinée en référence
+test_score_2 <- test_score
+test_score_2$condition <- relevel(test_score_2$condition, ref = "capsule caféinée")
+
+# Modèle mixte pour analyser l'effet du temps (numero) et de la condition
+model_score_2 <- lmer(score ~ numero * condition + (1 | id), data = test_score_2)
+summary(model_score_2)
+
+# Vérification des hypothèses
+
+  ## Normalité des résidus: Q-Q plot des résidus
+  qqnorm(resid(model_score_2), main = "Q-Q Plot des résidus")
+  qqline(resid(model_score_2), col = "red", lwd = 2)
+
+  ## Homoscédasticité (variance constante des résidus)
+  plot(fitted(model_score_2), resid(model_score_2),
+      xlab = "Valeurs ajustées", ylab = "Résidus",
+      main = "Résidus vs Valeurs ajustées")
+  abline(h = 0, col = "red", lty = 2)
+
+
+############################
+  
+  
+# Etant donné que Nous n'avons aucune différence significative entre les conditions, nous pouvons regarder l'effet global de temps (numero), en prenant en compte la variabilité des individus (id) et des conditions (condition)
+model_score_3 <- lmer(score ~ numero + (1 | id + condition), data = test_score)
+summary(model_score_3)
+
+# Vérification des hypothèses
+
+  ## Normalité des résidus: Q-Q plot des résidus
+  qqnorm(resid(model_score_3), main = "Q-Q Plot des résidus")
+  qqline(resid(model_score_3), col = "red", lwd = 2)
+
+  ## Homoscédasticité (variance constante des résidus)
+  plot(fitted(model_score_3), resid(model_score_3),
+      xlab = "Valeurs ajustées", ylab = "Résidus",
+      main = "Résidus vs Valeurs ajustées")
+  abline(h = 0, col = "red", lty = 2)
+```
+
+# Partie 3 : Score sur les volées
+
+```{r}
+# Importation du jeu de données (Volées_6_participants.csv1)
+tir_score <- read.csv(file.choose(), sep=";", header=TRUE)
+tir_score
+
+# Pour avoir un intercept interprétable, on commence les numéro à 0 et pas à 1 (donc on soustrait 1 partout)
+tir_score$numero = tir_score$numero - 1
+
+# Visualisation des différentes données sur les individus selon les conditions
+tir_score %>%
+  group_by(id, condition) %>%
+  get_summary_stats(score, type = "common")
+```
+
+```{r}
+# Test de normalité
+tir_score %>%
+  group_by(condition) %>%
+  shapiro_test(score)
+
+# Visualisation
+ggqqplot(tir_score, "score", facet.by = "condition")
+
+# Visualisation
+ggplot(tir_score, aes(x=score, fill=condition)) +
+  geom_density(alpha=0.5) +
+  labs(title="Evaluation de la normalité du score selon les trois conditions", x="Score", y="Condition") +
+  theme_bw()
+```
+
+```{r}
+# Evolution du score par condition
+ggplot(tir_score, aes(x = numero, y = score, color = condition)) +
+  stat_summary(fun = mean, geom = "line") +
+  stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.2) +
+  scale_x_continuous(breaks = seq(0,11, by = 1)) +
+  theme_minimal() +
+  labs(title = "Evolution du score selon les conditions", x = "Numéro de Volée", y = "Score (sur 10)")
+```
+
+
+```{r}
+# Convertir test$condition en facteur
+tir_score$condition <- as.factor(tir_score$condition)
+
+# Re-définir l’ordre des niveaux de "condition" pour avoir le groupe "contrôle" en référence
+tir_score$condition <- relevel(tir_score$condition, ref = "controle")
+
+# Modèle mixte pour analyser l'effet du temps (numero) et de la condition
+model_score_volée <- lmer(score ~ numero * condition + (1 | id), data = tir_score)
+summary(model_score_volée)
+
+# Vérification des hypothèses
+
+  ## Normalité des résidus: Q-Q plot des résidus
+  qqnorm(resid(model_score_volée), main = "Q-Q Plot des résidus")
+  qqline(resid(model_score_volée), col = "red", lwd = 2)
+
+  ## Homoscédasticité (variance constante des résidus)
+  plot(fitted(model_score_volée), resid(model_score_volée),
+      xlab = "Valeurs ajustées", ylab = "Résidus",
+      main = "Résidus vs Valeurs ajustées")
+  abline(h = 0, col = "red", lty = 2)
+
+# Re-définir l’ordre des niveaux de "condition" pour avoir la caspule caféinée en référence
+tir_score_2 <- tir_score
+tir_score_2$condition <- relevel(tir_score_2$condition, ref = "capsule caféinée")
+
+# Modèle mixte pour analyser l'effet du temps (numero) et de la condition
+model_score_volée_2 <- lmer(score ~ numero * condition + (1 | id), data = tir_score_2)
+summary(model_score_volée_2)
+
+# Vérification des hypothèses
+
+  ## Normalité des résidus: Q-Q plot des résidus
+  qqnorm(resid(model_score_volée_2), main = "Q-Q Plot des résidus")
+  qqline(resid(model_score_volée_2), col = "red", lwd = 2)
+
+  ## Homoscédasticité (variance constante des résidus)
+  plot(fitted(model_score_volée_2), resid(model_score_volée_2),
+      xlab = "Valeurs ajustées", ylab = "Résidus",
+      main = "Résidus vs Valeurs ajustées")
+  abline(h = 0, col = "red", lty = 2)
+
+
+############################
+
+
+# Etant donné que nous n'avons aucune différence significative entre les conditions, nous pouvons regarder l'effet global du temps (numero), en prenant en compte la variabilité des individus (id) et des conditions (condition)
+model_score_volée_3 <- lmer(score ~ numero + (1 | id + condition), data = tir_score)
+summary(model_score_volée_3)
+
+# Vérification des hypothèses
+
+  ## Normalité des résidus: Q-Q plot des résidus
+  qqnorm(resid(model_score_volée_3), main = "Q-Q Plot des résidus")
+  qqline(resid(model_score_volée_3), col = "red", lwd = 2)
+
+  ## Homoscédasticité (variance constante des résidus)
+  plot(fitted(model_score_volée_3), resid(model_score_volée_3),
+      xlab = "Valeurs ajustées", ylab = "Résidus",
+      main = "Résidus vs Valeurs ajustées")
+  abline(h = 0, col = "red", lty = 2)
+```
+
+# Partie 4: Distance moyenne sur les volées
+
+```{r}
+# Importation du jeu de données (Volées_5_participants.csv)
+tir_distance <- read.csv(file.choose(), sep=";", header=TRUE)
+tir_distance
+
+# Pour avoir un intercept interprétable, on commence les numéro à 0 et pas à 1 (donc on soustrait 1 partout)
+tir_distance$numero = tir_distance$numero - 1
+
+# Visualisation des différentes données sur les individus selon les conditions
+tir_distance %>%
+  group_by(id, condition) %>%
+  get_summary_stats(distance_moyenne_volee, type = "common")
+```
+
+```{r}
+# Remettre en numérique les valeurs de tir
+tir_distance <- tir_distance %>%
+  mutate(distance_moyenne_volee = as.numeric(as.character(distance_moyenne_volee)))
+
+# Test de normalité
+tir_distance %>%
+  group_by(condition) %>%
+  shapiro_test(distance_moyenne_volee)
+
+# Visualisation
+ggqqplot(tir_distance, "distance_moyenne_volee", facet.by = "condition")
+
+# Visualisation
+ggplot(tir_distance, aes(x=distance_moyenne_volee, fill=condition)) +
+  geom_density(alpha=0.5) +
+  labs(title="Evaluation de la normalité des distances moyennes selon les trois conditions", x="Distance (cm)", y="Condition") +
+  theme_bw()
+```
+
+```{r}
+# Evolution des distances par condition
+ggplot(tir_distance, aes(x = numero, y = distance_moyenne_volee, color = condition)) +
+  stat_summary(fun = mean, geom = "line") +
+  stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.2) +
+  scale_x_continuous(breaks = seq(0,11, by = 1)) +
+  theme_minimal() +
+  labs(title = "Evolution des distances selon les conditions", x = "Numéro de Volée", y = "Distance (cm)")
+```
+
+```{r}
+# Convertir test$condition en facteur
+tir_distance$condition <- as.factor(tir_distance$condition)
+
+# Re-définir l’ordre des niveaux de "condition" pour avoir le groupe "contrôle" en référence
+tir_distance$condition <- relevel(tir_distance$condition, ref = "controle")
+
+# Modèle mixte pour analyser l'effet du temps (numéro) et de la condition
+model_distance_volée <- lmer(distance_moyenne_volee ~ numero * condition + (1 | id), data = tir_distance)
+summary(model_distance_volée)
+
+# Vérification des hypothèses
+
+  ## Normalité des résidus: Q-Q plot des résidus
+  qqnorm(resid(model_distance_volée), main = "Q-Q Plot des résidus")
+  qqline(resid(model_distance_volée), col = "red", lwd = 2)
+
+  ## Homoscédasticité (variance constante des résidus)
+  plot(fitted(model_distance_volée), resid(model_distance_volée),
+      xlab = "Valeurs ajustées", ylab = "Résidus",
+      main = "Résidus vs Valeurs ajustées")
+  abline(h = 0, col = "red", lty = 2)
+
+# Re-définir l’ordre des niveaux de "condition" pour avoir la capsule caféinée en référence
+tir_distance_2 <- tir_distance
+tir_distance_2$condition <- relevel(tir_distance_2$condition, ref = "capsule caféinée")
+
+# Modèle mixte pour analyser l'effet du temps (numero) et de la condition
+model_distance_volée_2 <- lmer(distance_moyenne_volee ~ numero * condition + (1 | id), data = tir_distance_2)
+summary(model_distance_volée_2)
+
+# Vérification des hypothèses
+
+  ## Normalité des résidus: Q-Q plot des résidus
+  qqnorm(resid(model_distance_volée_2), main = "Q-Q Plot des résidus")
+  qqline(resid(model_distance_volée_2), col = "red", lwd = 2)
+
+  ## Homoscédasticité (variance constante des résidus)
+  plot(fitted(model_distance_volée_2), resid(model_distance_volée_2),
+      xlab = "Valeurs ajustées", ylab = "Résidus",
+      main = "Résidus vs Valeurs ajustées")
+  abline(h = 0, col = "red", lty = 2)
+```

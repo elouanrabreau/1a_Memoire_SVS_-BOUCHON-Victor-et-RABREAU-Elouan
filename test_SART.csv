@@ -1,0 +1,109 @@
+﻿id;condition;numero;temps_reaction;score
+VERIE;controle;1;0.376;92
+VERIE;controle;2;0.32;86
+VERIE;controle;3;0.337;88
+VERIE;controle;4;0.314;92
+VERIE;controle;5;0.302;88
+VERIE;controle;6;0.296;89
+VERIE;chewing-gum caféiné;1;0.28;94
+VERIE;chewing-gum caféiné;2;0.223;91
+VERIE;chewing-gum caféiné;3;0.304;97
+VERIE;chewing-gum caféiné;4;0.225;92
+VERIE;chewing-gum caféiné;5;0.256;92
+VERIE;chewing-gum caféiné;6;0.218;94
+VERIE;capsule caféinée;1;0.246;94
+VERIE;capsule caféinée;2;0.213;92
+VERIE;capsule caféinée;3;0.282;98
+VERIE;capsule caféinée;4;0.215;95
+VERIE;capsule caféinée;5;0.193;91
+VERIE;capsule caféinée;6;0.224;92
+SIMAL;chewing-gum caféiné;1;0.266;94
+SIMAL;chewing-gum caféiné;2;0.275;94
+SIMAL;chewing-gum caféiné;3;0.29;94
+SIMAL;chewing-gum caféiné;4;0.226;95
+SIMAL;chewing-gum caféiné;5;0.228;94
+SIMAL;chewing-gum caféiné;6;0.187;94
+SIMAL;capsule caféinée;1;0.187;92
+SIMAL;capsule caféinée;2;0.192;92
+SIMAL;capsule caféinée;3;0.17;95
+SIMAL;capsule caféinée;4;0.166;97
+SIMAL;capsule caféinée;5;0.184;95
+SIMAL;capsule caféinée;6;0.22;94
+SIMAL;controle;1;0.155;98
+SIMAL;controle;2;0.192;98
+SIMAL;controle;3;0.245;97
+SIMAL;controle;4;0.139;98
+SIMAL;controle;5;0.172;97
+SIMAL;controle;6;0.155;98
+FRAAU;capsule caféinée;1;0.417;95
+FRAAU;capsule caféinée;2;0.516;95
+FRAAU;capsule caféinée;3;0.469;98
+FRAAU;capsule caféinée;4;0.486;100
+FRAAU;capsule caféinée;5;0.416;95
+FRAAU;capsule caféinée;6;0.427;97
+FRAAU;controle;1;0.336;95
+FRAAU;controle;2;0.341;97
+FRAAU;controle;3;0.342;98
+FRAAU;controle;4;0.322;94
+FRAAU;controle;5;0.29;95
+FRAAU;controle;6;0.274;97
+FRAAU;chewing-gum caféiné;1;0.336;92
+FRAAU;chewing-gum caféiné;2;0.279;98
+FRAAU;chewing-gum caféiné;3;0.301;97
+FRAAU;chewing-gum caféiné;4;0.237;98
+FRAAU;chewing-gum caféiné;5;0.268;98
+FRAAU;chewing-gum caféiné;6;0.26;98
+ROUAL;controle;1;0.442;95
+ROUAL;controle;2;0.423;95
+ROUAL;controle;3;0.434;97
+ROUAL;controle;4;0.36;95
+ROUAL;controle;5;0.355;94
+ROUAL;controle;6;0.309;97
+ROUAL;capsule caféinée;1;0.39;94
+ROUAL;capsule caféinée;2;0.326;97
+ROUAL;capsule caféinée;3;0.337;98
+ROUAL;capsule caféinée;4;0.316;95
+ROUAL;capsule caféinée;5;0.347;97
+ROUAL;capsule caféinée;6;0.323;94
+ROUAL;chewing-gum caféiné;1;0.34;95
+ROUAL;chewing-gum caféiné;2;0.317;98
+ROUAL;chewing-gum caféiné;3;0.29;92
+ROUAL;chewing-gum caféiné;4;0.268;98
+ROUAL;chewing-gum caféiné;5;0.268;100
+ROUAL;chewing-gum caféiné;6;0.256;98
+COUAN;chewing-gum caféiné;1;0.368;91
+COUAN;chewing-gum caféiné;2;0.282;91
+COUAN;chewing-gum caféiné;3;0.232;94
+COUAN;chewing-gum caféiné;4;0.208;95
+COUAN;chewing-gum caféiné;5;0.199;91
+COUAN;chewing-gum caféiné;6;0.17;92
+COUAN;controle;1;0.145;94
+COUAN;controle;2;0.172;94
+COUAN;controle;3;0.166;95
+COUAN;controle;4;0.195;91
+COUAN;controle;5;0.347;97
+COUAN;controle;6;0.208;94
+COUAN;capsule caféinée;1;0.182;98
+COUAN;capsule caféinée;2;0.181;98
+COUAN;capsule caféinée;3;0.237;94
+COUAN;capsule caféinée;4;0.144;98
+COUAN;capsule caféinée;5;0.162;98
+COUAN;capsule caféinée;6;0.153;95
+MARLO;capsule caféinée;1;0.381;95
+MARLO;capsule caféinée;2;0.316;95
+MARLO;capsule caféinée;3;0.286;97
+MARLO;capsule caféinée;4;0.255;97
+MARLO;capsule caféinée;5;0.254;95
+MARLO;capsule caféinée;6;0.279;95
+MARLO;chewing-gum caféiné;1;0.225;97
+MARLO;chewing-gum caféiné;2;0.264;97
+MARLO;chewing-gum caféiné;3;0.203;97
+MARLO;chewing-gum caféiné;4;0.222;98
+MARLO;chewing-gum caféiné;5;0.277;95
+MARLO;chewing-gum caféiné;6;0.244;98
+MARLO;controle;1;0.284;100
+MARLO;controle;2;0.269;97
+MARLO;controle;3;0.287;97
+MARLO;controle;4;0.217;100
+MARLO;controle;5;0.247;98
+MARLO;controle;6;0.249;98
